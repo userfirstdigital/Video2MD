@@ -4,6 +4,18 @@
 
 Video2MD turns videos in your active Chrome tab into Markdown transcripts. It reuses existing captions when available and runs Whisper on your computer when it needs to transcribe audio. Copy the Markdown straight to your clipboard or download an `.md` file. Both exports include the title, source link when available, and transcript text without cue timestamps.
 
+**Local audio transcription is verified in Google Chrome (Chromium) on macOS.** This is the supported setup for the browser extension’s transcription feature.
+
+| Platform | Local audio transcription |
+| --- | --- |
+| macOS | Verified end to end in Google Chrome using the native helper and Whisper Base |
+| Linux | An experimental Chrome helper installer exists. The full browser workflow still needs testing. |
+| Windows | Requires a Windows native helper launcher, Chrome registration, and end-to-end testing. |
+
+Linux and Windows each need their own native helper setup and compatible builds of the transcription tools. A compatible build of whisper.cpp can reuse the same GGML Whisper model file. [whisper.cpp platform and model documentation](https://github.com/ggml-org/whisper.cpp#quick-start)
+
+Caption export is a separate path. The extension can export captions exposed directly by the page without running Whisper or installing the local helper.
+
 ## Supported sources
 
 | Source | What Video2MD looks for |
@@ -17,9 +29,9 @@ Video2MD turns videos in your active Chrome tab into Markdown transcripts. It re
 
 Access varies by video and provider. Use Video2MD with videos you’re allowed to process.
 
-## Install
+## Install for local transcription on macOS
 
-Requires Chrome 116 or later and Node.js 22 or later. The local helper installer supports macOS and Linux.
+Use Google Chrome 116 or later and Node.js 22 or later. These steps configure the native helper for Google Chrome on macOS.
 
 1. Clone the repository and open its directory.
 
@@ -28,7 +40,7 @@ Requires Chrome 116 or later and Node.js 22 or later. The local helper installer
    cd Video2MD
    ```
 
-2. On macOS, install the tools with Homebrew. On Linux, install equivalent packages and confirm `node`, `yt-dlp`, `ffmpeg`, `whisper-cli`, and `deno` are on your path.
+2. Install the tools with Homebrew.
 
    ```sh
    brew install node yt-dlp ffmpeg whisper.cpp deno
@@ -50,7 +62,7 @@ Requires Chrome 116 or later and Node.js 22 or later. The local helper installer
    npm run install:chrome -- YOUR_EXTENSION_ID
    ```
 
-Chrome can export captions it reads directly from a page before the helper is installed. If you move the checkout, reload the unpacked extension from its new location and register the helper again. To use another Whisper model, append `--model /absolute/path/to/model.bin` to the registration command.
+If you move the checkout, reload the unpacked extension from its new location and register the helper again. To use another Whisper model, append `--model /absolute/path/to/model.bin` to the registration command.
 
 ## Use the popup
 
