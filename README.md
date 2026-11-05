@@ -4,12 +4,12 @@
 
 Video2MD turns videos in your active Chrome tab into Markdown transcripts. It reuses existing captions when available and runs Whisper on your computer when it needs to transcribe audio. Copy the Markdown straight to your clipboard or download an `.md` file. Both exports include the title, source link when available, and transcript text without cue timestamps.
 
-**Local audio transcription is verified in Google Chrome (Chromium) on macOS.** This is the supported setup for the browser extension’s transcription feature.
+**Local audio transcription uses the same Video2MD extension and Whisper Base model on macOS and Linux.**
 
 | Platform | Local audio transcription |
 | --- | --- |
 | macOS | Verified end to end in Google Chrome using the native helper and Whisper Base |
-| Linux | An experimental Chrome helper installer exists. The full browser workflow still needs testing. |
+| Linux | Verified transcription and Markdown download in Chromium on Debian 12 (ARM64). The installer also supports Google Chrome. |
 | Windows | Requires a Windows native helper launcher, Chrome registration, and end-to-end testing. |
 
 Linux and Windows each need their own native helper setup and compatible builds of the transcription tools. A compatible build of whisper.cpp can reuse the same GGML Whisper model file. [whisper.cpp platform and model documentation](https://github.com/ggml-org/whisper.cpp#quick-start)
@@ -63,6 +63,25 @@ Use Google Chrome 116 or later and Node.js 22 or later. These steps configure th
    ```
 
 If you move the checkout, reload the unpacked extension from its new location and register the helper again. To use another Whisper model, append `--model /absolute/path/to/model.bin` to the registration command.
+
+## Install for local transcription on Linux
+
+Use a standard desktop install of Google Chrome or Chromium, version 116 or later. Snap and Flatpak browser builds can use different native messaging paths and sandbox rules and are outside this setup.
+
+1. Clone Video2MD and install Node.js 22+, FFmpeg, yt-dlp, and the `whisper-cli` executable from [whisper.cpp](https://github.com/ggml-org/whisper.cpp#quick-start). Install [Deno](https://docs.deno.com/runtime/getting_started/installation/) for YouTube extraction. Confirm these commands are on your `PATH` before registering the helper.
+2. Download `ggml-base.bin` using the macOS model command above. The model and its default location are the same on Linux.
+3. Load the **extension** folder from `chrome://extensions` and copy its extension ID.
+4. From the Video2MD directory, register the helper for the browser you use.
+
+   ```sh
+   # Google Chrome
+   npm run install:chrome -- YOUR_EXTENSION_ID
+
+   # Chromium
+   npm run install:chrome -- YOUR_EXTENSION_ID --browser chromium
+   ```
+
+If you launch the browser with a custom user data directory, set `CHROME_USER_DATA_DIR` to that same absolute path when running the installer. A custom model path can be passed with `--model` for either browser.
 
 ## Use the popup
 
