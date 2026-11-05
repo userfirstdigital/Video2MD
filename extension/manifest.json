@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "Video2MD",
+  "version": "0.1.0",
+  "minimum_chrome_version": "116",
+  "description": "Save clean Markdown transcripts from videos in the current tab.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "nativeMessaging"
+  ],
+  "host_permissions": [
+    "https://*.youtube.com/*",
+    "https://*.youtube-nocookie.com/*",
+    "https://*.vimeo.com/*",
+    "https://*.loom.com/*",
+    "https://*.wistia.com/*",
+    "https://*.wistia.net/*",
+    "https://*.skool.com/*",
+    "https://stream.mux.com/*"
+  ],
+  "action": {
+    "default_title": "Video2MD",
+    "default_popup": "job.html",
+    "default_icon": {
+      "16": "icons/video2md-16.png",
+      "32": "icons/video2md-32.png",
+      "48": "icons/video2md-48.png",
+      "128": "icons/video2md-128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "icons": {
+    "16": "icons/video2md-16.png",
+    "32": "icons/video2md-32.png",
+    "48": "icons/video2md-48.png",
+    "128": "icons/video2md-128.png"
+  }
+}

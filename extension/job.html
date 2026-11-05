@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Video2MD</title>
+  <link rel="stylesheet" href="job.css">
+  <script type="module" src="job.js"></script>
+</head>
+<body>
+  <main>
+    <header class="brand">
+      <img src="icons/video2md-48.png" width="36" height="36" alt="">
+      <div>
+        <h1>Video2MD</h1>
+        <p>Video to Markdown</p>
+      </div>
+    </header>
+    <section aria-label="Transcript controls">
+      <p id="page" class="page" hidden></p>
+      <label id="choice" hidden>Video <select id="videos"></select></label>
+      <div class="actions">
+        <button id="run" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+          Get transcript
+        </button>
+        <button id="record" class="secondary record" aria-label="Record tab audio" title="Record audio from the video tab" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="2" width="6" height="13" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2m-7 9v3m-3 0h6"/></svg>
+          <span>Record tab audio</span>
+        </button>
+        <button id="stop" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
+          Stop and transcribe
+        </button>
+        <button id="cancel" class="secondary" hidden>Cancel</button>
+      </div>
+      <p id="hint" class="hint" hidden>For a video that plays in Chrome but can’t be fetched, choose its tab, share tab audio, and play it from the beginning.</p>
+      <p id="status" class="hint" role="status">Looking for videos and captions…</p>
+      <p id="error" role="alert" hidden></p>
+    </section>
+    <section id="output" aria-label="Transcript preview" hidden>
+      <div class="output-heading">
+        <div>
+          <h2>Transcript</h2>
+          <p id="method" class="hint"></p>
+        </div>
+        <div class="export-actions">
+          <button id="copy" class="secondary icon-button" aria-label="Copy Markdown" title="Copy Markdown">
+            <svg class="copy-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 5a1 1 0 0 0-1-1H6a2 2 0 0 0-2 2v9a1 1 0 0 0 1 1"/></svg>
+            <svg class="copy-check" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6" pathLength="1"/></svg>
+          </button>
+          <button id="download" class="secondary icon-button" aria-label="Download Markdown" title="Download Markdown">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4m-11 5v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3"/></svg>
+          </button>
+        </div>
+      </div>
+      <p id="copy-status" class="hint" role="status"></p>
+      <pre id="preview" tabindex="0"></pre>
+    </section>
+  </main>
+</body>
+</html>
