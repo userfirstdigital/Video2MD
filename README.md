@@ -1,144 +1,122 @@
 # Video2MD
 
-<img src="extension/icons/video2md-128.png" width="72" height="72" alt="Video2MD">
+<img src="extension/icons/video2md-128.png" width="72" height="72" alt="Video2MD icon">
 
-Video2MD turns videos in your active Chrome tab into Markdown transcripts. It reuses existing captions when available and runs Whisper on your computer when it needs to transcribe audio. Copy the Markdown straight to your clipboard or download an `.md` file. Both exports include the title, source link when available, and transcript text without cue timestamps.
+**Turn a video into a Markdown transcript from your browser toolbar.**
 
-**Local audio transcription uses the same Video2MD extension and Whisper Base model on macOS and Linux.**
+Video2MD finds videos in your active tab and uses existing captions when it can. If captions are unavailable, the local helper can fetch the audio and transcribe it with Whisper on your computer. Copy the result or download an `.md` file with the video title, source link when available, and transcript text without cue timestamps.
 
-| Platform | Local audio transcription |
+[Install](#install) · [Use the extension](#use-the-extension) · [Command line](#command-line) · [MIT License](LICENSE)
+
+## Browser and source support
+
+| Platform | Local transcription |
 | --- | --- |
-| macOS | Verified end to end in Google Chrome using the native helper and Whisper Base |
-| Linux | Verified transcription and Markdown download in Chromium on Debian 12 (ARM64). The installer also supports Google Chrome. |
-| Windows | Requires a Windows native helper launcher, Chrome registration, and end-to-end testing. |
+| macOS | Verified end to end in Google Chrome |
+| Linux | Verified in Chromium on Debian 12 ARM64. The installer also supports Google Chrome on Linux. |
+| Windows | A Windows native helper launcher and registration are still needed. |
 
-Linux and Windows each need their own native helper setup and compatible builds of the transcription tools. A compatible build of whisper.cpp can reuse the same GGML Whisper model file. [whisper.cpp platform and model documentation](https://github.com/ggml-org/whisper.cpp#quick-start)
+Video2MD supports **YouTube, Vimeo, Wistia, Loom, and Skool**. It can also read standard HTML video caption tracks exposed by other sites. Skool lessons use the current lesson’s embedded player or Mux stream. Access to captions and audio varies by video and provider.
 
-Caption export is a separate path. The extension can export captions exposed directly by the page without running Whisper or installing the local helper.
+Captions exposed directly by the page can be exported with the extension alone. Fetching media and transcribing audio require the native helper. macOS and Linux use the same Whisper Base model file with their respective builds of the transcription tools.
 
-## Supported sources
+## Install
 
-| Source | What Video2MD looks for |
-| --- | --- |
-| YouTube | Captions and audio from watch pages and embedded players |
-| Vimeo | Captions and audio from videos and embedded players |
-| Wistia | Captions and audio from videos and embedded players |
-| Loom | Existing captions or transcripts, then audio when available |
-| Skool | The current lesson’s embedded player or Mux stream |
-| Other sites | Standard HTML video caption tracks exposed by the page |
-
-Access varies by video and provider. Use Video2MD with videos you’re allowed to process.
-
-## Install for local transcription on macOS
-
-Use Google Chrome 116 or later and Node.js 22 or later. These steps configure the native helper for Google Chrome on macOS.
-
-1. Clone the repository and open its directory.
-
-   ```sh
-   git clone https://github.com/userfirstdigital/Video2MD.git
-   cd Video2MD
-   ```
-
-2. Install the tools with Homebrew.
-
-   ```sh
-   brew install node yt-dlp ffmpeg whisper.cpp deno
-   ```
-
-3. Download the multilingual Whisper Base model (about 142 MiB).
-
-   ```sh
-   mkdir -p ~/.local/share/video-transcript-downloader
-   curl --fail --location --retry 2 \
-     https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin \
-     --output ~/.local/share/video-transcript-downloader/ggml-base.bin
-   ```
-
-4. Open `chrome://extensions`, enable **Developer mode**, select **Load unpacked**, and choose the repository’s **extension** folder. Pin **Video2MD** from Chrome’s Extensions menu.
-5. Copy the extension ID shown on the Extensions page. Register the local helper from the repository root.
-
-   ```sh
-   npm run install:chrome -- YOUR_EXTENSION_ID
-   ```
-
-If you move the checkout, reload the unpacked extension from its new location and register the helper again. To use another Whisper model, append `--model /absolute/path/to/model.bin` to the registration command.
-
-## Install for local transcription on Linux
-
-Use a standard desktop install of Google Chrome or Chromium, version 116 or later. Snap and Flatpak browser builds can use different native messaging paths and sandbox rules and are outside this setup.
-
-1. Clone Video2MD and install Node.js 22+, FFmpeg, yt-dlp, and the `whisper-cli` executable from [whisper.cpp](https://github.com/ggml-org/whisper.cpp#quick-start). Install [Deno](https://docs.deno.com/runtime/getting_started/installation/) for YouTube extraction. Confirm these commands are on your `PATH` before registering the helper.
-2. Download `ggml-base.bin` using the macOS model command above. The model and its default location are the same on Linux.
-3. Load the **extension** folder from `chrome://extensions` and copy its extension ID.
-4. From the Video2MD directory, register the helper for the browser you use.
-
-   ```sh
-   # Google Chrome
-   npm run install:chrome -- YOUR_EXTENSION_ID
-
-   # Chromium
-   npm run install:chrome -- YOUR_EXTENSION_ID --browser chromium
-   ```
-
-If you launch the browser with a custom user data directory, set `CHROME_USER_DATA_DIR` to that same absolute path when running the installer. A custom model path can be passed with `--model` for either browser.
-
-## Use the popup
-
-1. Open a video or Skool lesson and click the Video2MD toolbar icon. Start playback briefly if the video player loads only after you press play.
-2. Select a video if the popup finds more than one, then click **Get transcript**. Video2MD checks for captions before starting local transcription. You can close the popup and reopen it on the same tab to check progress.
-3. Use the overlapping-squares **Copy Markdown** icon to copy the full export. A checkmark confirms it’s on your clipboard. Use the arrow **Download Markdown** icon to save the same text to a file.
-
-### Record tab audio
-
-Use the mic-shaped **Record tab audio** button if Video2MD can’t fetch a video that plays in Chrome. It records audio from the tab you share and leaves your microphone off.
-
-1. Click **Record tab audio** in the popup to open the recording tab. Click **Record tab audio** there to open Chrome’s picker.
-2. Select the original video tab, enable **Also share tab audio**, and play the video from the start. Recording runs in real time and includes all audio from the selected tab.
-3. Return to the recording tab and click **Stop and transcribe**. Copy or download the Markdown when it’s ready.
-
-## Use the command line
-
-The CLI uses the same caption selection, speech recognition, and Markdown formatting as the extension. It writes Markdown to stdout and progress to stderr. An unsuccessful run returns a nonzero exit code.
+### 1. Load the extension
 
 ```sh
+git clone https://github.com/userfirstdigital/Video2MD.git
+cd Video2MD
+```
+
+In Chrome or Chromium, open `chrome://extensions`, enable **Developer mode**, click **Load unpacked**, and select the **extension** folder. Pin **Video2MD** from the Extensions menu and copy its extension ID for the next step.
+
+### 2. Install the local transcription tools
+
+The helper requires Node.js 22+, FFmpeg, yt-dlp, and `whisper-cli`. It uses Deno for YouTube extraction.
+
+**macOS.** Install the tools with Homebrew.
+
+```sh
+brew install node yt-dlp ffmpeg whisper.cpp deno
+```
+
+**Linux.** Install Node.js, FFmpeg, and yt-dlp using your distribution or the upstream installation instructions. Install [whisper.cpp](https://github.com/ggml-org/whisper.cpp#quick-start) and [Deno](https://docs.deno.com/runtime/getting_started/installation/), then confirm `node`, `ffmpeg`, `yt-dlp`, `whisper-cli`, and `deno` are on your `PATH`. These steps target standard desktop Chrome or Chromium packages. Snap and Flatpak browser builds use different paths and sandbox rules.
+
+### 3. Download the model and register the helper
+
+Download the multilingual Whisper Base model, about 142 MiB.
+
+```sh
+mkdir -p ~/.local/share/video-transcript-downloader
+curl --fail --location --retry 2 \
+  https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin \
+  --output ~/.local/share/video-transcript-downloader/ggml-base.bin
+```
+
+Run the command for your browser from the Video2MD directory. Replace `YOUR_EXTENSION_ID` with the ID copied from the Extensions page.
+
+```sh
+# Google Chrome
+npm run install:chrome -- YOUR_EXTENSION_ID
+
+# Chromium
+npm run install:chrome -- YOUR_EXTENSION_ID --browser chromium
+```
+
+To use another model, append `--model /absolute/path/to/model.bin`. On Linux, if you start the browser with a custom user data directory, set `CHROME_USER_DATA_DIR` to the same absolute path when registering the helper. If you move the checkout, load the extension from its new location and register the helper again.
+
+## Use the extension
+
+1. Open a video or Skool lesson and click the **Video2MD** toolbar icon. If the player loads on demand, press play briefly before opening the popup.
+2. Select the video if there’s more than one, then click **Get transcript**. You can close the popup while it works and reopen it on the same tab.
+3. Use **Copy Markdown**, the overlapping squares, or **Download Markdown**, the down arrow. A checkmark confirms that the copy reached your clipboard.
+
+### When a video can only play in the tab
+
+Use **Record tab audio** when the video plays in Chrome but the helper can’t fetch it. The mic icon opens a recording tab and captures the selected browser tab’s audio. It leaves your microphone off.
+
+1. In the recording tab, click **Record tab audio** and select the original video tab in Chrome’s picker. Enable **Also share tab audio**.
+2. Play the video from the start. Recording takes place in real time and includes all audio from that tab.
+3. Return to the recording tab and click **Stop and transcribe**. Copy or download the result when it’s ready.
+
+Direct transcription accepts videos up to two hours and media downloads up to 256 MB. Process videos you have permission to use.
+
+## Command line
+
+The CLI uses the same caption selection, speech recognition, and Markdown formatting as the extension. Markdown goes to stdout by default, progress goes to stderr, and failed runs return a nonzero exit code.
+
+```sh
+# Print existing captions as Markdown.
 node native/cli.mjs 'https://www.youtube.com/watch?v=jNQXAC9IVRw' --captions-only
-node native/cli.mjs --audio /path/to/lesson.webm --title 'Lesson transcript' --output transcript.md
+
+# Transcribe a local file and save the result.
+node native/cli.mjs --audio ./lesson.webm --title 'Lesson transcript' --output transcript.md
 ```
 
-| Option | Behavior |
+Run `node native/cli.mjs --help` for all options. Use `--quiet` to suppress progress or `--model` to select a different Whisper model. For signed-in Skool lessons, use the extension to resolve the lesson in Chrome. If a headless caller already has an authorized Mux playback URL, it can pass that URL with `--source` to include the lesson link in the export.
+
+## Privacy and troubleshooting
+
+Video2MD reads the active tab and supported player frames when you invoke it. When the helper needs captions or media, it requests them from the provider and processes audio locally. It uses temporary files for processing and removes them after each job. The helper does not copy browser cookies or send audio to a transcription service.
+
+- **No video found.** Play the video briefly, then reopen the popup on that tab.
+- **The helper could not start.** Check that the browser and extension ID match what you registered. Register the helper again if you moved the project or changed the browser’s profile path.
+- **A previously working source fails.** Update yt-dlp. If the video still plays in your browser, try **Record tab audio**.
+
+## Development and contributions
+
+Run `npm test` from the repository root. Reload the unpacked extension after editing `extension/`. Chrome launches the native helper from the checkout for each job.
+
+| Directory | Contents |
 | --- | --- |
-| `--captions-only` | Use existing captions and skip speech recognition |
-| `--audio <file>` | Transcribe a local audio or video file |
-| `--output <file>` or `-o <file>` | Create a Markdown file instead of writing to stdout |
-| `--title <title>` | Set the Markdown heading |
-| `--source <url>` | Set the source link |
-| `--model <path>` | Override the default Whisper model |
-| `--quiet` | Suppress progress messages |
-| `--help` | Show usage |
+| `extension/` | Popup, video detection, and background job handling |
+| `extension/core/` | Shared URL handling and Markdown formatting |
+| `native/` | Native messaging host, transcription pipeline, installer, and CLI |
+| `test/` | Provider detection, caption cleanup, and Skool lesson selection tests |
 
-For a signed-in Skool lesson, use Chrome to resolve the current lesson. A headless caller that already has an authorized Mux playback URL can pass that URL and use `--source` to include the lesson link.
+Bug reports and pull requests are welcome. When reporting an issue, include your operating system, browser, and video provider. [Open an issue](https://github.com/userfirstdigital/Video2MD/issues/new)
 
-## Troubleshooting
+## License
 
-- **No video found.** Play the video briefly and reopen the popup on that tab.
-- **The helper could not start.** Check that you registered the ID shown in `chrome://extensions`. Run the registration command again if you moved the project.
-- **A video plays in Chrome but can’t be fetched.** Use **Record tab audio**. If a previously working source starts failing, update yt-dlp.
-- **A video is too long or the media is too large.** Direct transcription accepts videos up to two hours and downloaded media up to 256 MB.
-
-## Development
-
-```sh
-npm test
-```
-
-- `extension/` contains the Chrome popup, active-tab detection, and background job tracking.
-- `extension/core/` contains shared URL parsing and Markdown formatting.
-- `native/` contains the Chrome native messaging host, transcription pipeline, installer, and CLI.
-- `test/` covers provider URL handling, caption cleanup, and Skool lesson selection after navigation.
-
-Reload the unpacked extension after editing `extension/`. Chrome launches the native helper from the checkout for each job.
-
-Video2MD reads the active page and supported player frames when invoked. The helper requests media from the provider and processes the audio locally. It removes its temporary files after each job. It does not copy browser cookies, send audio to a transcription service, or expose a local HTTP server.
-
-Built with [Chrome Native Messaging](https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging), [yt-dlp](https://github.com/yt-dlp/yt-dlp), and [whisper.cpp](https://github.com/ggml-org/whisper.cpp).
+Video2MD is available under the [MIT License](LICENSE), which includes a warranty disclaimer and limitation of liability. Upstream tools and models retain their own licenses.
