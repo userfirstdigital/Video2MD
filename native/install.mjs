@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { mkdir, writeFile, chmod } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname, isAbsolute, join, resolve } from "node:path";
@@ -43,14 +44,20 @@ const dataDir = join(home, ".local", "share", "video-transcript-downloader");
 const launcher = join(dataDir, browser + "-host");
 const script = join(dirname(fileURLToPath(import.meta.url)), "host.mjs");
 const quote = value => "'" + value.replaceAll("'", "'\\''") + "'";
-const searchPath = [...new Set([dirname(process.execPath), ...(process.env.PATH ?? "").split(":"),
-  "/opt/homebrew/bin", "/usr/local/bin", "/usr/bin", "/bin"].filter(p => p.startsWith("/")))].join(":");
+// Homebrew's versioned Cellar path disappears on upgrade; use its stable opt/ symlink instead.
+const cellar = process.execPath.match(/^(.*)\/Cellar\/(node(?:@[\w.]+)?)\/[^/]+\/bin\/node$/);
+const stableNode = cellar && existsSync(join(cellar[1], "opt", cellar[2], "bin", "node"))
+  ? join(cellar[1], "opt", cellar[2], "bin", "node")
+  : process.execPath;
+const searchPath = [...new Set([dirname(stableNode), ...(process.env.PATH ?? "").split(":"),
+  "/opt/homebrew/bin", "/usr/local/bin", "/usr/bin", "/bin"]
+  .filter(p => p.startsWith("/") && !p.includes("/node_modules/")))].join(":");
 await mkdir(dataDir, { recursive: true, mode: 0o700 });
 await mkdir(manifests, { recursive: true });
 await writeFile(launcher, [
   "#!/bin/sh", "export PATH=" + quote(searchPath),
   ...(model ? ["export TRANSCRIPT_WHISPER_MODEL=" + quote(resolve(model))] : []),
-  "exec " + quote(process.execPath) + " " + quote(script) + ' "$@"', "",
+  "exec " + quote(stableNode) + " " + quote(script) + ' "$@"', "",
 ].join("\n"), { mode: 0o700 });
 await chmod(launcher, 0o700);
 await writeFile(join(manifests, host + ".json"), JSON.stringify({
